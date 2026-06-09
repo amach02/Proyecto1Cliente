@@ -1,0 +1,20 @@
+﻿@model Proyecto1Cliente.Models.Domain.Especimen
+
+@{
+    ViewData["Title"] = "Inhabilitar Espécimen";
+}
+
+<div class="container mt-4" style="max-width: 600px;">
+    <div class="card shadow p-4 border-top border-4 border-danger">
+        <h3 class="text-danger">¿Está seguro de inhabilitar?</h3>
+        <p>Esta acción cambiará el estado del espécimen <strong>@Model.CodigoId</strong> a inactivo.</p>
+
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="IdEspecimen" />
+            <div class="d-flex justify-content-between mt-4">
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-danger px-5">Confirmar Inhabilitación</button>
+            </div>
+        </form>
+    </div>
+</div>

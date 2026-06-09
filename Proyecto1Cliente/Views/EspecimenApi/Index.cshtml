@@ -1,0 +1,58 @@
+﻿@model IEnumerable<Proyecto1Cliente.Models.Domain.Especimen>
+
+@{
+    ViewData["Title"] = "Inventario de Especímenes";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Inventario del Laboratorio</h2>
+        <a asp-action="Create" class="btn btn-success fw-bold">+ Registrar Espécimen</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover table-striped mb-0 align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Código ID</th>
+                        <th>Fecha Recolección</th>
+                        <th>Localización</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td><strong>@item.CodigoId</strong></td>
+                                <td>@(string.IsNullOrEmpty(item.FechaRecoleccion) ? "N/A" : item.FechaRecoleccion)</td>
+                                <td>@item.LocalizacionRecoleccion</td>
+                                <td>
+                                    @{
+                                        var badgeClass = item.Estado?.ToLower() == "disponible" ? "bg-success" :
+                                                         (item.Estado?.ToLower() == "prestado" ? "bg-warning text-dark" : "bg-secondary");
+                                    }
+                                    <span class="badge @badgeClass">@item.Estado</span>
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="Edit" asp-route-id="@item.IdEspecimen" class="btn btn-sm btn-warning">Editar</a>
+                                    <a asp-action="Delete" asp-route-id="@item.IdEspecimen" class="btn btn-sm btn-danger">Inhabilitar</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">No hay especímenes registrados en el sistema.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
