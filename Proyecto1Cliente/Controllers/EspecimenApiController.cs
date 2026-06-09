@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Proyecto1Cliente.Models.Data;
 using Proyecto1Cliente.Models.Domain;
+using System.Security.Claims;
 
 namespace Proyecto1Cliente.Controllers
 {
+    [Authorize]
     public class EspecimenApiController : Controller
     {
         private readonly EspecimenApiData _apiData;
@@ -76,6 +79,49 @@ namespace Proyecto1Cliente.Controllers
         {
             await _apiData.InhabilitarAsync(id);
             return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Vista de comentarios
+        public async Task<IActionResult> Comentarios(int id)
+        {
+            var esp = await _apiData.ObtenerAsync(id);
+            if (esp == null) return NotFound();
+
+            // Pasamos el espécimen y sus comentarios a la vista
+            ViewBag.Especimen = esp;
+            var comentarios = await _apiData.ObtenerComentariosAsync(id);
+
+            return View(comentarios);
+        }
+
+        // POST: Guardar comentario desde AJAX
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> GuardarComentario([FromBody] Comentario com)
+        {
+            if (string.IsNullOrWhiteSpace(com.Texto))
+            {
+                return BadRequest("El comentario no puede estar vacío.");
+            }
+
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (int.TryParse(userIdClaim, out int realUserId))
+            {
+                com.IdUsuario = realUserId;
+            }
+            else
+            {
+                return Unauthorized();
+            }
+
+            // Capturamos el string de error
+            var errorMsg = await _apiData.RegistrarComentarioAsync(com);
+
+            // Si está vacío, fue un éxito rotundo
+            if (string.IsNullOrEmpty(errorMsg)) return Ok();
+
+            // Si trae texto, mandamos el código 500 acompañado del error real de PHP
+            return StatusCode(500, errorMsg);
         }
     }
 }

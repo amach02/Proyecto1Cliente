@@ -39,8 +39,14 @@
                                     <span class="badge @badgeClass">@item.Estado</span>
                                 </td>
                                 <td class="text-center">
-                                    <a asp-action="Edit" asp-route-id="@item.IdEspecimen" class="btn btn-sm btn-warning">Editar</a>
-                                    <a asp-action="Delete" asp-route-id="@item.IdEspecimen" class="btn btn-sm btn-danger">Inhabilitar</a>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Edit" asp-route-id="@item.IdEspecimen" class="btn btn-sm btn-warning">
+                                            Editar
+                                        </a>
+                                        <a asp-action="Comentarios" asp-route-id="@item.IdEspecimen" class="btn btn-sm btn-info">
+                                            Comentarios
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         }

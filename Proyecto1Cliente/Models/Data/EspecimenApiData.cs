@@ -123,5 +123,46 @@ namespace Proyecto1Cliente.Models.Data
             using var doc = JsonDocument.Parse(json);
             return JsonSerializer.Deserialize<List<Vial>>(doc.RootElement.GetProperty("data").GetRawText(), _jsonOptions) ?? new();
         }
+
+        // GET: Obtener comentarios de un espécimen
+        public async Task<List<Comentario>> ObtenerComentariosAsync(int idEspecimen)
+        {
+            var resp = await _http.GetAsync($"?catalogo=comentarios&id_especimen={idEspecimen}");
+            if (!resp.IsSuccessStatusCode) return new List<Comentario>();
+
+            var json = await resp.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+            return JsonSerializer.Deserialize<List<Comentario>>(doc.RootElement.GetProperty("data").GetRawText(), _jsonOptions) ?? new();
+        }
+
+        // POST: Enviar un comentario
+        public async Task<string> RegistrarComentarioAsync(Comentario com)
+        {
+            var payload = new
+            {
+                id_especimen = com.IdEspecimen,
+                comentario = com.Texto,
+                id_usuario = com.IdUsuario
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var resp = await _http.PostAsync("", content);
+
+            // Si todo salió bien, devolvemos un texto vacío (significa éxito)
+            if (resp.IsSuccessStatusCode) return string.Empty;
+
+            // Si falló, leemos el JSON de error que nos envió enviarRespuesta() desde PHP
+            var errorJson = await resp.Content.ReadAsStringAsync();
+            try
+            {
+                using var doc = JsonDocument.Parse(errorJson);
+                return doc.RootElement.GetProperty("message").GetString() ?? "Error desconocido en el backend.";
+            }
+            catch
+            {
+                return $"Error crudo del servidor: {errorJson}";
+            }
+        }
     }
 }
