@@ -18,9 +18,7 @@ namespace Proyecto1Cliente.Controllers
         // GET: Mostrar pantalla de login
         public IActionResult Login()
         {
-            // Si ya está logueado, mandarlo al inicio
-            if (User.Identity != null && User.Identity.IsAuthenticated)
-                return RedirectToAction("Index", "EspecimenApi");
+            
 
             return View();
         }
