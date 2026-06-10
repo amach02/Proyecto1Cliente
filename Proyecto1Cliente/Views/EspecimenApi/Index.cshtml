@@ -7,7 +7,10 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Inventario del Laboratorio</h2>
-        <a asp-action="Create" class="btn btn-success fw-bold">+ Registrar Espécimen</a>
+        <div class="d-flex gap-2">
+            <a asp-action="Buscar" class="btn btn-outline-primary fw-bold">🔍 Buscar</a>
+            <a asp-action="Create" class="btn btn-success fw-bold">+ Registrar Espécimen</a>
+        </div>
     </div>
 
     <div class="card shadow-sm">

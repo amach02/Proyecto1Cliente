@@ -123,5 +123,23 @@ namespace Proyecto1Cliente.Controllers
             // Si trae texto, mandamos el código 500 acompañado del error real de PHP
             return StatusCode(500, errorMsg);
         }
+
+        // GET: Muestra el formulario vacío
+        public IActionResult Buscar()
+        {
+            return View(new List<EspecimenBusqueda>());
+        }
+
+        // GET: Ejecuta la búsqueda con el criterio
+        [HttpGet]
+        public async Task<IActionResult> BuscarResultados(string criterio)
+        {
+            if (string.IsNullOrWhiteSpace(criterio))
+                return RedirectToAction(nameof(Buscar));
+
+            var resultados = await _apiData.BuscarAsync(criterio);
+            ViewBag.Criterio = criterio;
+            return View("Buscar", resultados);
+        }
     }
 }
