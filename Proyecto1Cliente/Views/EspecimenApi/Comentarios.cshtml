@@ -1,0 +1,100 @@
+﻿@model IEnumerable<Proyecto1Cliente.Models.Domain.Comentario>
+@{
+    var esp = ViewBag.Especimen as Proyecto1Cliente.Models.Domain.Especimen;
+    ViewData["Title"] = "Comentarios Técnicos";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Comentarios Técnicos</h2>
+                <div>
+                    <span class="badge bg-primary me-2">Espécimen: @esp.CodigoId</span>
+                    <a asp-action="Index" class="btn btn-secondary btn-sm fw-bold">← Volver al Inventario</a>
+                </div>
+            </div>
+
+            <div id="alertaMensaje" class="alert d-none" role="alert"></div>
+
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Agregar un comentario</h5>
+                    <div class="mb-3">
+                        <textarea class="form-control" id="textoComentario" rows="3" placeholder="Escribe tu observación técnica aquí..."></textarea>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-success" onclick="publicarComentario(@esp.IdEspecimen)">
+                            <i class="bi bi-send"></i> Publicar Comentario
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="mb-3">Historial de Observaciones</h4>
+            <div id="listaComentarios">
+                @if (!Model.Any())
+                {
+                    <p class="text-muted text-center mt-4">No hay comentarios técnicos todavía. ¡Sé el primero en aportar!</p>
+                }
+
+                @foreach (var com in Model)
+                {
+                    <div class="card mb-3 border-light shadow-sm">
+                        <div class="card-header bg-transparent border-bottom-0 pb-0 pt-3">
+                            <strong>@com.NombreAutor</strong>
+                            <small class="text-muted ms-2">@com.FechaHora.ToString("dd/MM/yyyy HH:mm")</small>
+                        </div>
+                        <div class="card-body pt-2">
+                            <p class="card-text">@com.Texto</p>
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function publicarComentario(idEspecimen) {
+            const texto = document.getElementById('textoComentario').value.trim();
+            const alerta = document.getElementById('alertaMensaje');
+            alerta.classList.remove('d-none', 'alert-danger', 'alert-success');
+
+            if (texto === '') {
+                alerta.classList.add('alert-danger');
+                alerta.innerHTML = '<strong>¡Atención!</strong> No puedes publicar un comentario vacío.';
+                setTimeout(() => alerta.classList.add('d-none'), 4000);
+                return;
+            }
+
+            const response = await fetch('/EspecimenApi/GuardarComentario', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id_especimen: idEspecimen, comentario: texto })
+            });
+
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
+
+            if (response.ok) {
+                alerta.classList.add('alert-success');
+                alerta.innerHTML = '<strong>¡Éxito!</strong> Comentario registrado.';
+                document.getElementById('textoComentario').value = '';
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                // MODIFICADO: Extraemos el mensaje de error real que nos mandó C# desde PHP
+                const mensajeErrorReal = await response.text();
+                alerta.classList.add('alert-danger');
+                alerta.innerHTML = `<strong>Error en el Servidor:</strong> ${mensajeErrorReal}`;
+                // Le damos más tiempo (8 segundos) para que te dé tiempo de leer el error detenidamente
+                setTimeout(() => alerta.classList.add('d-none'), 8000);
+            }
+        }
+    </script>
+}

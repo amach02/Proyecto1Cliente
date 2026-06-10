@@ -1,0 +1,27 @@
+﻿@model Proyecto1Cliente.Models.Domain.Especimen
+
+@{
+    ViewData["Title"] = "Editar Espécimen";
+}
+
+<div class="container mt-4" style="max-width: 800px;">
+    <div class="card shadow p-4 border-top border-4 border-warning">
+        <h3 class="mb-4 text-warning">Editar Espécimen</h3>
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="IdEspecimen" /> <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Código ID</label>
+                <input asp-for="CodigoId" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Fecha</label>
+                <input asp-for="FechaRecoleccion" type="date" class="form-control" />
+            </div>
+        </div>
+        <div class="d-flex justify-content-between mt-4">
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-warning px-5 fw-bold">Guardar Cambios</button>
+        </div>
+    </form>
+</div>
+</div>
