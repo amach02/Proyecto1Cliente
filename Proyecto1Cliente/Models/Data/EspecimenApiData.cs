@@ -31,6 +31,19 @@ namespace Proyecto1Cliente.Models.Data
             return JsonSerializer.Deserialize<List<Especimen>>(dataElement.GetRawText(), _jsonOptions) ?? new List<Especimen>();
         }
 
+        public async Task<IEnumerable<EspecimenBusqueda>> BuscarAsync(string criterio)
+        {
+            var resp = await _http.GetAsync($"?buscar={Uri.EscapeDataString(criterio)}");
+            if (!resp.IsSuccessStatusCode) return new List<EspecimenBusqueda>();
+
+            var json = await resp.Content.ReadAsStringAsync();
+            using var document = JsonDocument.Parse(json);
+            var dataElement = document.RootElement.GetProperty("data");
+
+            return JsonSerializer.Deserialize<List<EspecimenBusqueda>>(dataElement.GetRawText(), _jsonOptions)
+                   ?? new List<EspecimenBusqueda>();
+        }
+
         // GET: Obtener uno solo por ID
         public async Task<Especimen?> ObtenerAsync(int id)
         {
@@ -163,6 +176,8 @@ namespace Proyecto1Cliente.Models.Data
             {
                 return $"Error crudo del servidor: {errorJson}";
             }
+
+
         }
     }
 }

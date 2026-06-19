@@ -1,0 +1,86 @@
+﻿@model IEnumerable<Proyecto1Cliente.Models.Domain.EspecimenBusqueda>
+
+@{
+    ViewData["Title"] = "Buscar Especímenes";
+    string criterio = ViewBag.Criterio ?? "";
+    bool busquedaRealizada = !string.IsNullOrEmpty(criterio);
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Buscar Especímenes</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">Volver al inventario</a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-action="BuscarResultados" method="get">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-10">
+                        <label class="form-label">Criterio de búsqueda <small class="text-muted">(nombre científico, orden, familia, género o especie)</small></label>
+                        <input type="text"
+                               name="criterio"
+                               class="form-control"
+                               placeholder="Ej: Apis, Apidae, Hymenoptera..."
+                               value="@criterio" />
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <button type="submit" class="btn btn-primary">Buscar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (busquedaRealizada)
+    {
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <table class="table table-hover table-striped mb-0 align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Código ID</th>
+                            <th>Orden</th>
+                            <th>Familia</th>
+                            <th>Género</th>
+                            <th>Especie</th>
+                            <th>Ubicación en laboratorio</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td><strong>@item.CodigoId</strong></td>
+                                    <td>@(string.IsNullOrEmpty(item.Orden) ? "—" : item.Orden)</td>
+                                    <td>@(string.IsNullOrEmpty(item.Familia) ? "—" : item.Familia)</td>
+                                    <td><em>@(string.IsNullOrEmpty(item.Genero) ? "—" : item.Genero)</em></td>
+                                    <td><em>@(string.IsNullOrEmpty(item.Especie) ? "—" : item.Especie)</em></td>
+                                    <td>@item.UbicacionFisica</td>
+                                    <td>
+                                        @{
+                                            var badgeClass = item.Estado?.ToLower() == "disponible" ? "bg-success" :
+                                                             (item.Estado?.ToLower() == "prestado" ? "bg-warning text-dark" : "bg-secondary");
+                                        }
+                                        <span class="badge @badgeClass">@item.Estado</span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    No se encontraron especímenes para "<strong>@criterio</strong>".
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
