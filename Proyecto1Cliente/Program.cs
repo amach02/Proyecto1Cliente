@@ -8,13 +8,13 @@ builder.Services.AddControllersWithViews();
 // Cliente HTTP para Especímenes
 builder.Services.AddHttpClient<Proyecto1Cliente.Models.Data.EspecimenApiData>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["ProyectoApi:BaseUrl"] ?? "http://127.0.0.1:8080/ProyectoAdmin/Proyecto1Admin/SW.php");
+    client.BaseAddress = new Uri(builder.Configuration["ProyectoApi:BaseUrl"] ?? "http://127.0.0.1/Proyecto1Admin/SW.php");
 });
 
 // ¡NUEVO! Cliente HTTP para Usuarios (Necesario para el Login)
 builder.Services.AddHttpClient<Proyecto1Cliente.Models.Data.UsuarioApiData>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["ProyectoApi:BaseUrl"] ?? "http://127.0.0.1:8080/ProyectoAdmin/Proyecto1Admin/SW.php");
+    client.BaseAddress = new Uri(builder.Configuration["ProyectoApi:BaseUrl"] ?? "http://127.0.0.1/Proyecto1Admin/SW.php");
 });
 
 // ¡NUEVO! Configuración de Autenticación por Cookies

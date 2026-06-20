@@ -1,0 +1,105 @@
+﻿@model IEnumerable<Proyecto1Cliente.Models.Domain.PlantaHospedadora>
+
+@{
+    var esp = ViewBag.Especimen as Proyecto1Cliente.Models.Domain.Especimen;
+    ViewData["Title"] = "Plantas Hospedadoras";
+}
+
+<div class="container mt-4" style="max-width: 900px;">
+    @if (TempData["Exito"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Exito"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>Plantas Hospedadoras</h2>
+            <p class="text-muted mb-0">Asociar cultivos al espécimen: <strong>@esp?.CodigoId</strong></p>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary fw-bold">Volver al Inventario</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-5">
+            <div class="card shadow-sm border-top border-4 border-success">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Vincular Nueva Planta</h5>
+                    <form asp-action="VincularPlanta" method="post">
+                        <input type="hidden" name="idEspecimen" value="@esp?.IdEspecimen" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Catálogo Disponible</label>
+                            <select name="idPlanta" class="form-select" required>
+                                <option value="">-- Seleccione una planta o cultivo --</option>
+                                @foreach (var planta in ViewBag.CatalogoPlantas as IEnumerable<Proyecto1Cliente.Models.Domain.PlantaHospedadora>)
+                                {
+                                    @* AQUÍ USAMOS NombreCompleto *@
+                                    <option value="@planta.IdPlanta">@planta.NombreCompleto</option>
+                                }
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 fw-bold">Asociar Planta</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0 card-title fs-6">Plantas Vinculadas Actualmente</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0 align-middle">
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                foreach (var planta in Model)
+                                {
+                                    <tr>
+                                        <td class="ps-3">
+                                            @* AQUÍ USAMOS NombreCompleto *@
+                                            <span class="fw-bold text-success"></span> @planta.NombreCompleto
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <form asp-action="DesvincularPlanta" method="post" onsubmit="return confirmarDesvinculacion('@planta.NombreCompleto');">
+                                                <input type="hidden" name="idEspecimen" value="@esp?.IdEspecimen" />
+                                                <input type="hidden" name="idPlanta" value="@planta.IdPlanta" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Desvincular</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted py-4">No hay plantas vinculadas a este ejemplar.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmarDesvinculacion(nombrePlanta) {
+            return confirm("¿Está seguro de que desea eliminar la relación con la planta '" + nombrePlanta + "'? Esta acción se puede revertir volviendo a asociarla.");
+        }
+    </script>
+}

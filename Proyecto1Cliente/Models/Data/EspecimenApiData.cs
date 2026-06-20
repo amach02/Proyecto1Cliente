@@ -179,5 +179,52 @@ namespace Proyecto1Cliente.Models.Data
 
 
         }
+
+        // 1. Obtener el catálogo completo de plantas hospedadoras (Criterio 1)
+        public async Task<IEnumerable<PlantaHospedadora>> ObtenerTodasPlantasAsync()
+        {
+            var resp = await _http.GetAsync("?accion=listar_plantas");
+            if (!resp.IsSuccessStatusCode) return new List<PlantaHospedadora>();
+
+            var json = await resp.Content.ReadAsStringAsync();
+            using var document = JsonDocument.Parse(json);
+            var dataElement = document.RootElement.GetProperty("data");
+
+            return JsonSerializer.Deserialize<List<PlantaHospedadora>>(dataElement.GetRawText(), _jsonOptions) ?? new List<PlantaHospedadora>();
+        }
+
+        // 2. Obtener solo las plantas que ya están vinculadas a este espécimen específico
+        public async Task<IEnumerable<PlantaHospedadora>> ObtenerPlantasPorEspecimenAsync(int id)
+        {
+            var resp = await _http.GetAsync($"?id_especimen={id}&accion=plantas_vinculadas");
+            if (!resp.IsSuccessStatusCode) return new List<PlantaHospedadora>();
+
+            var json = await resp.Content.ReadAsStringAsync();
+            using var document = JsonDocument.Parse(json);
+            var dataElement = document.RootElement.GetProperty("data");
+
+            return JsonSerializer.Deserialize<List<PlantaHospedadora>>(dataElement.GetRawText(), _jsonOptions) ?? new List<PlantaHospedadora>();
+        }
+
+        // 3. Registrar una nueva vinculación (Criterio 2)
+        public async Task<bool> VincularPlantaAsync(int idEspecimen, int idPlanta)
+        {
+            var payload = new { id_especimen = idEspecimen, id_planta = idPlanta, id_usuario = 1 };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+            var resp = await _http.PostAsync("?accion=vincular_planta", content);
+            return resp.IsSuccessStatusCode;
+        }
+
+        // 4. Eliminar la relación existente (Criterio 3)
+        public async Task<bool> DesvincularPlantaAsync(int idEspecimen, int idPlanta)
+        {
+            var payload = new { id_especimen = idEspecimen, id_planta = idPlanta };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+            var req = new HttpRequestMessage(HttpMethod.Delete, "?accion=desvincular_planta") { Content = content };
+            var resp = await _http.SendAsync(req);
+            return resp.IsSuccessStatusCode;
+        }
     }
 }

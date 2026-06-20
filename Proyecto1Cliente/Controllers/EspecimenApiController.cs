@@ -16,10 +16,33 @@ namespace Proyecto1Cliente.Controllers
             _apiData = apiData;
         }
 
-        public async Task<IActionResult> Index()
+        // GET: Listar con paginación y búsqueda rápida
+        // GET: Listar con paginación solamente
+        public async Task<IActionResult> Index(int pagina = 1)
         {
+            // 1. Traemos la lista completa desde tu API en PHP
             var especimenes = await _apiData.ListarAsync();
-            return View(especimenes);
+
+            // 2. Configuración de la paginación
+            int registrosPorPagina = 5; // Puedes cambiar este número para mostrar 10 o 15 por página
+            int totalRegistros = especimenes.Count();
+            int totalPaginas = (int)Math.Ceiling((double)totalRegistros / registrosPorPagina);
+
+            // Evitamos rangos inválidos en la paginación
+            if (pagina < 1) pagina = 1;
+            if (pagina > totalPaginas && totalPaginas > 0) pagina = totalPaginas;
+
+            // 3. Cortamos la lista para mostrar solo el bloque de la página actual
+            var listaPaginada = especimenes
+                .Skip((pagina - 1) * registrosPorPagina)
+                .Take(registrosPorPagina)
+                .ToList();
+
+            // 4. Enviamos los datos de control a la Vista mediante ViewBag
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
+
+            return View(listaPaginada);
         }
 
         public async Task<IActionResult> Details(int id)
@@ -140,6 +163,49 @@ namespace Proyecto1Cliente.Controllers
             var resultados = await _apiData.BuscarAsync(criterio);
             ViewBag.Criterio = criterio;
             return View("Buscar", resultados);
+        }
+
+        // GET: Mostrar pantalla de gestión de plantas para un espécimen
+        public async Task<IActionResult> Plantas(int id)
+        {
+            var esp = await _apiData.ObtenerAsync(id);
+            if (esp == null) return NotFound();
+
+            ViewBag.Especimen = esp;
+            ViewBag.CatalogoPlantas = await _apiData.ObtenerTodasPlantasAsync(); // Catálogo de plantas (Criterio 1)
+
+            var plantasVinculadas = await _apiData.ObtenerPlantasPorEspecimenAsync(id);
+            return View(plantasVinculadas);
+        }
+
+        // POST: Procesar la asociación (Criterio 2)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VincularPlanta(int idEspecimen, int idPlanta)
+        {
+            if (idPlanta <= 0) return RedirectToAction(nameof(Plantas), new { id = idEspecimen });
+
+            var exito = await _apiData.VincularPlantaAsync(idEspecimen, idPlanta);
+            if (!exito)
+                TempData["Error"] = "No se pudo vincular la planta hospedadora (puede que ya esté asociada).";
+            else
+                TempData["Exito"] = "Planta hospedadora vinculada correctamente.";
+
+            return RedirectToAction(nameof(Plantas), new { id = idEspecimen });
+        }
+
+        // POST: Procesar la desvinculación (Criterio 3)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DesvincularPlanta(int idEspecimen, int idPlanta)
+        {
+            var exito = await _apiData.DesvincularPlantaAsync(idEspecimen, idPlanta);
+            if (!exito)
+                TempData["Error"] = "Ocurrió un error al intentar desvincular la planta.";
+            else
+                TempData["Exito"] = "La relación se eliminó correctamente.";
+
+            return RedirectToAction(nameof(Plantas), new { id = idEspecimen });
         }
     }
 }
