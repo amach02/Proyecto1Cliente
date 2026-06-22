@@ -8,8 +8,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Inventario del Laboratorio</h2>
         <div class="d-flex gap-2">
-            <a asp-action="Buscar" class="btn btn-outline-primary fw-bold">🔍 Buscar</a>
+             <a asp-action="Buscar" class="btn btn-outline-primary fw-bold">🔍 Buscar</a>
+              <a asp-action="Carrito" class="btn btn-outline-warning fw-bold">Carrito</a>
         </div>
+
     </div>
 
     <div class="card shadow-sm mb-4">
@@ -51,6 +53,20 @@
                                         <a asp-action="Plantas" asp-route-id="@item.IdEspecimen" class="btn btn-sm btn-success">
                                             Plantas
                                         </a>
+
+                                        @if (item.Estado?.ToLower() == "disponible")
+                                        {
+                                            <button class="btn btn-sm btn-outline-warning"
+                                                    onclick="agregarAlCarrito('@item.IdEspecimen', '@item.CodigoId')">
+                                                + Carrito
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-outline-secondary" disabled>
+                                                + Carrito
+                                            </button>
+                                        }
                                     </div>
                                 </td>
                             </tr>
@@ -87,5 +103,30 @@
                 </li>
             </ul>
         </nav>
+    }
+
+    @section Scripts {
+        <script>
+                const CARRITO_KEY = 'carrito_especimenes';
+
+                function obtenerCarrito() {
+                    return JSON.parse(localStorage.getItem(CARRITO_KEY) || '[]');
+                }
+
+                function agregarAlCarrito(id, codigoId) {
+                    const carrito = obtenerCarrito();
+                    const index = carrito.findIndex(e => e.id === id);
+
+                if (index !== -1) {
+                    carrito.splice(index, 1);
+                    localStorage.setItem(CARRITO_KEY, JSON.stringify(carrito));
+                    alert(`"${codigoId}" eliminado del carrito.`);
+                    return;
+                }
+                    carrito.push({ id, codigoId });
+                    localStorage.setItem(CARRITO_KEY, JSON.stringify(carrito));
+                    alert(`"${codigoId}" agregado al carrito.`);
+                }
+        </script>
     }
 </div>
