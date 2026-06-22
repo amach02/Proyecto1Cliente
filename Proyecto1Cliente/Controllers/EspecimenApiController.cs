@@ -207,5 +207,23 @@ namespace Proyecto1Cliente.Controllers
 
             return RedirectToAction(nameof(Plantas), new { id = idEspecimen });
         }
+
+        public IActionResult Carrito()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        
+        public async Task<IActionResult> ConfirmarCarrito([FromBody] List<int> ids)
+        {
+            if (ids == null || !ids.Any())
+                return BadRequest("El carrito está vacío.");
+
+            foreach (var id in ids)
+                await _apiData.CambiarEstadoAsync(id, "prestado");
+
+            return Ok();
+        }
     }
 }
