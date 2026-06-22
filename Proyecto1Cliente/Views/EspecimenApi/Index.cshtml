@@ -7,10 +7,12 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Inventario del Laboratorio</h2>
-        <a asp-action="Create" class="btn btn-success fw-bold">+ Registrar Espécimen</a>
+        <div class="d-flex gap-2">
+            <a asp-action="Buscar" class="btn btn-outline-primary fw-bold">🔍 Buscar</a>
+        </div>
     </div>
 
-    <div class="card shadow-sm">
+    <div class="card shadow-sm mb-4">
         <div class="card-body p-0">
             <table class="table table-hover table-striped mb-0 align-middle">
                 <thead class="table-dark">
@@ -40,11 +42,14 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group" role="group">
-                                        <a asp-action="Edit" asp-route-id="@item.IdEspecimen" class="btn btn-sm btn-warning">
-                                            Editar
+                                        <a asp-action="Details" asp-route-id="@item.IdEspecimen" class="btn btn-sm btn-primary">
+                                            Ver fotos
                                         </a>
                                         <a asp-action="Comentarios" asp-route-id="@item.IdEspecimen" class="btn btn-sm btn-info">
                                             Comentarios
+                                        </a>
+                                        <a asp-action="Plantas" asp-route-id="@item.IdEspecimen" class="btn btn-sm btn-success">
+                                            Plantas
                                         </a>
                                     </div>
                                 </td>
@@ -61,4 +66,26 @@
             </table>
         </div>
     </div>
+
+    @if (ViewBag.TotalPaginas > 1)
+    {
+        <nav aria-label="Navegacion de paginas">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(ViewBag.PaginaActual == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-pagina="@(ViewBag.PaginaActual - 1)">Anterior</a>
+                </li>
+
+                @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+                {
+                    <li class="page-item @(ViewBag.PaginaActual == i ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-pagina="@i">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(ViewBag.PaginaActual == ViewBag.TotalPaginas ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-pagina="@(ViewBag.PaginaActual + 1)">Siguiente</a>
+                </li>
+            </ul>
+        </nav>
+    }
 </div>

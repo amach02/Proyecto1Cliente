@@ -27,5 +27,9 @@ namespace Proyecto1Cliente.Models.Domain
 
         [JsonPropertyName("id_vial")]
         public int? IdVial { get; set; }
+
+        // Recibe el arreglo de fotos que nos mandará SW.php
+        [JsonPropertyName("fotografias")]
+        public List<Fotografia>? Fotografias { get; set; }
     }
 }

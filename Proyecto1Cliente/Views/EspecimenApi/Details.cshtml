@@ -1,0 +1,147 @@
+﻿@model Proyecto1Cliente.Models.Domain.Especimen
+
+@{
+    ViewData["Title"] = "Detalle del Espécimen";
+}
+
+<style>
+    .zoom-caja {
+        overflow: hidden;
+        background-color: #2c3e50;
+        height: 350px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        position: relative;
+    }
+
+    .zoom-imagen {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        /* Solo suavizamos el acercamiento, no el movimiento del mouse para que no se sienta 'con lag' */
+        transition: transform 0.3s ease;
+        cursor: crosshair; /* Cambiamos a la mirilla para dar la sensación de exploración */
+        transform-origin: center center;
+    }
+
+    /* Al pasar el mouse, crece un 100% (el doble de su tamaño original) para ver bien los detalles */
+    .zoom-caja:hover .zoom-imagen {
+        transform: scale(2.2);
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Detalle del Espécimen: <span class="text-muted">@Model.CodigoId</span></h2>
+        <a asp-action="Index" class="btn btn-secondary fw-bold">← Volver al Inventario</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Información General</h5>
+                </div>
+                <div class="card-body bg-light">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item bg-transparent">
+                            <strong>Estado:</strong>
+                            <span class="badge bg-success ms-2">@Model.Estado</span>
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <strong>Localización:</strong> @Model.LocalizacionRecoleccion
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <strong>Fecha Recolección:</strong> @(string.IsNullOrEmpty(Model.FechaRecoleccion) ? "No registrada" : Model.FechaRecoleccion)
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7 mb-4">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-camera"></i> Registro Fotográfico</h5>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+
+                    @if (Model.Fotografias != null && Model.Fotografias.Any())
+                    {
+                        <div id="carruselFotos" class="carousel slide shadow rounded" data-bs-ride="carousel" style="width: 100%; max-width: 500px;">
+                            <div class="carousel-inner rounded">
+                                @for (int i = 0; i < Model.Fotografias.Count; i++)
+                                {
+                                    <div class="carousel-item @(i == 0 ? "active" : "")">
+                                        <div class="zoom-caja">
+                                            <img src="@Model.Fotografias[i].Ruta" class="zoom-imagen d-block" alt="Fotografía del espécimen">
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            @if (Model.Fotografias.Count > 1)
+                            {
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carruselFotos" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Anterior</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carruselFotos" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Siguiente</span>
+                                </button>
+                            }
+                        </div>
+                        <p class="text-muted mt-3 mb-0 small">@Model.Fotografias.Count fotografía(s) vinculada(s). (Mueve el mouse sobre la foto para explorar los detalles)</p>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted p-5">
+                            <i class="bi bi-images" style="font-size: 4rem; opacity: 0.5;"></i>
+                            <h5 class="mt-3">Sin registro visual</h5>
+                            <p class="mb-0">Este espécimen aún no tiene fotografías vinculadas.</p>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Seleccionamos todas las cajas de zoom del carrusel
+            const cajasZoom = document.querySelectorAll('.zoom-caja');
+
+            cajasZoom.forEach(caja => {
+                const img = caja.querySelector('.zoom-imagen');
+
+                // Cuando el mouse se mueve dentro de la caja
+                caja.addEventListener('mousemove', function (e) {
+                    // Obtenemos las dimensiones y posición de la caja
+                    const rect = caja.getBoundingClientRect();
+
+                    // Calculamos la posición del mouse en píxeles relativos a la caja
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    // Lo convertimos a porcentajes (de 0% a 100%)
+                    const xPercent = (x / rect.width) * 100;
+                    const yPercent = (y / rect.height) * 100;
+
+                    // Movemos el "centro" de la imagen hacia donde está el mouse
+                    img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+                });
+
+                // Cuando el mouse sale de la caja, regresamos el centro a la normalidad
+                caja.addEventListener('mouseleave', function () {
+                    img.style.transformOrigin = 'center center';
+                });
+            });
+        });
+    </script>
+}
