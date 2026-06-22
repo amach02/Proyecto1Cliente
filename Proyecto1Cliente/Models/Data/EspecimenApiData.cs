@@ -226,5 +226,21 @@ namespace Proyecto1Cliente.Models.Data
             var resp = await _http.SendAsync(req);
             return resp.IsSuccessStatusCode;
         }
+
+        public async Task<bool> CambiarEstadoAsync(int idEspecimen, string estado)
+        {
+            var payload = new
+            {
+                accion = "cambiar_estado",
+                id_especimen = idEspecimen,
+                estado = estado,
+                id_usuario = 1
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var req = new HttpRequestMessage(HttpMethod.Put, "") { Content = content };
+            var resp = await _http.SendAsync(req);
+            return resp.IsSuccessStatusCode;
+        }
     }
 }
