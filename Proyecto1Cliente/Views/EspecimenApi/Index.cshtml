@@ -51,6 +51,20 @@
                                         <a asp-action="Plantas" asp-route-id="@item.IdEspecimen" class="btn btn-sm btn-success">
                                             Plantas
                                         </a>
+
+                                        @if (item.Estado?.ToLower() == "disponible")
+                                        {
+                                            <button class="btn btn-sm btn-outline-warning"
+                                                    onclick="agregarAlCarrito('@item.IdEspecimen', '@item.CodigoId')">
+                                                + Carrito
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-outline-secondary" disabled>
+                                                + Carrito
+                                            </button>
+                                        }
                                     </div>
                                 </td>
                             </tr>
@@ -87,5 +101,30 @@
                 </li>
             </ul>
         </nav>
+    }
+
+    @section Scripts {
+        <script>
+                const CARRITO_KEY = 'carrito_especimenes';
+
+                function obtenerCarrito() {
+                    return JSON.parse(localStorage.getItem(CARRITO_KEY) || '[]');
+                }
+
+                function agregarAlCarrito(id, codigoId) {
+                    const carrito = obtenerCarrito();
+                    const index = carrito.findIndex(e => e.id === id);
+
+                if (index !== -1) {
+                    carrito.splice(index, 1);
+                    localStorage.setItem(CARRITO_KEY, JSON.stringify(carrito));
+                    alert(`"${codigoId}" eliminado del carrito.`);
+                    return;
+                }
+                    carrito.push({ id, codigoId });
+                    localStorage.setItem(CARRITO_KEY, JSON.stringify(carrito));
+                    alert(`"${codigoId}" agregado al carrito.`);
+                }
+        </script>
     }
 </div>
